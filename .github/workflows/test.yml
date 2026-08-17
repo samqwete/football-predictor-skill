@@ -1,0 +1,22 @@
+name: test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  predict:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run weighted scoring model sanity check
+        run: |
+          python3 scripts/predict.py --name "Arsenal vs Liverpool" \
+            --h2h 1 --form 2 --fitness -1 --homeaway 2 --style 0 --sched -1 \
+            --home-gf 1.9 --home-ga 0.8 --away-gf 1.1 --away-ga 1.5 | tee /tmp/out.txt
+          grep -q "^Probabilities:" /tmp/out.txt
+          grep -q "^Most likely scoreline:" /tmp/out.txt
+          echo "predict.py produced expected output"
